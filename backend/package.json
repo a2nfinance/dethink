@@ -11,7 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "module": "^1.2.5",
-    "openai": "^4.20.0",
+    "openai": "^4.20.1",
     "request": "^2.88.2",
     "require": "^2.4.20"
   }
