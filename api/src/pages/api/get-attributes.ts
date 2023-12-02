@@ -1,5 +1,4 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import { generateImages } from '@/core/generate-image';
 import { generateItemAttributes } from '@/core/generate-item-attributes';
 import type { NextApiRequest, NextApiResponse } from 'next'
 type Data = {
@@ -16,7 +15,7 @@ export default async function handler(
             // need to validate
             if (req.body) {
                 // Call a core function to generate images from the request prompt.
-                const attributes = await generateItemAttributes(req.body.prompt);
+                const attributes = await generateItemAttributes(req.body.dps, req.body.dph, req.body.aps, req.body.dhe);
                 res.status(200).send({ success: true, data: attributes });
             } else {
                 res.status(422).send({ success: false });

@@ -5,14 +5,16 @@ import { useCallback, useState } from 'react'
 // const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
-  const [prompt, setPrompt] = useState("");
-  const [size, setSize] = useState("");
+  const prompt = useState("");
+  const size = useState("");
   const [dps, setDps] = useState("");
   const [dph, setDph] = useState("");
   const [aps, setAps] = useState("");
   const [dhe, setDhe] = useState("");
   const [response, setResponse] = useState([]);
+  const [responseAtt, setResponseAtt] = useState([]);
   const [isGeneratingImage, setIsGenratingImage] = useState(false);
+  const [isGeneratingAttribute, setIsGenratingAttribute] = useState(false);
 
   // Get images from API using the POST method
   async function getImage(prompt: string, size: string) {
@@ -38,33 +40,37 @@ export default function Home() {
   }
 
   async function getAttribute(dps: string, dph: string, aps: string, dhe: string) {
-    let getReq = await fetch("/api/get-attributes", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        dps: dps,
-        dph: dph,
-        aps: aps,
-        dhe: dhe,
+    try {
+      setIsGenratingAttribute(true);
+      let getReq = await fetch("/api/get-attributes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          dps: dps,
+          dph: dph,
+          aps: aps,
+          dhe: dhe,
+        })
       })
-    })
-    let res = await getReq.json();
-    setResponse(res.data);
+      let res = await getReq.json();
+      setResponseAtt(res.data);
+      setIsGenratingAttribute(false);
+    } catch (e) {
+      console.log("Error occured:", e);
+    }
+    
   }
 
-  const handleSubmitPrompt = useCallback(async () => {
-    await getImage(prompt, size);
-  }, [prompt, size])
-
-  const handleSubmitAttribute = useCallback(async () => {
-    await getAttribute(dps, dph, aps, dhe);
-  }, [dps, dph, aps, dhe])
-
-  const onFinish = (values: any) => {
+  const onFinishImage = (values: any) => {
     const { prompt, size } = values;
     getImage(prompt, size);
+  }
+
+  const onFinishAttribute = (values: any) => {
+    const { dps, dph, aps, dhe } = values;
+    getAttribute(dps, dph, aps, dhe);
   }
 
   return (
@@ -72,23 +78,19 @@ export default function Home() {
       <Row gutter={8}>
         <Col span={14}>
           <Card title={"Item settings"}>
-            <Form onFinish={onFinish} layout='vertical'>
+            <Form onFinish={onFinishImage} layout='vertical'>
               <Row gutter={12}>
                 <Col span={12}>
                   <Form.Item name={"prompt"} label="Prompt" rules={[{ required: true, message: 'Missing first input' }]}>
                     <Input size='large'
                       type='text'
-                    // value={prompt}
-                    // onChange={(e) => setPrompt(e.target.value)}
                     />
                   </Form.Item>
 
                 </Col>
                 <Col span={12}>
-                  <Form.Item name={"size"} label="Second input">
+                  <Form.Item name={"size"} label="Resolution" rules={[{ required: true, message: 'Missing first input' }]}>
                     <Input size='large' type='text'
-                    // value={size}
-                    //  onChange={(e) => setSize(e.target.value)} 
                     />
                   </Form.Item>
                 </Col>
@@ -99,23 +101,48 @@ export default function Home() {
                 size='large'
                 type='primary'
                 htmlType='submit'
-              // onClick={() => handleSubmitPrompt()}
               >Send Prompt</Button>
             </Form>
+            <br/>
+            <Form onFinish={onFinishAttribute} layout='vertical'>
+              <Row gutter={12}>
+                <Col span={12}>
+                  <Form.Item name={"dps"} label="Attribute 1" rules={[{ required: true, message: 'Missing first input' }]}>
+                    <Input size='large'
+                      type='text'
+                    />
+                  </Form.Item>
 
+                </Col>
+                <Col span={12}>
+                  <Form.Item name={"dph"} label="Attribute 2" rules={[{ required: true, message: 'Missing first input' }]}>
+                    <Input size='large' type='text'
+                    />
+                  </Form.Item>
+                </Col>
 
+                <Col span={12}>
+                  <Form.Item name={"aps"} label="Attribute 3" rules={[{ required: true, message: 'Missing first input' }]}>
+                    <Input size='large' type='text'
+                    />
+                  </Form.Item>
+                </Col>
 
+                <Col span={12}>
+                  <Form.Item name={"dhe"} label="Attribute 4" rules={[{ required: true, message: 'Missing first input' }]}>
+                    <Input size='large' type='text'
+                    />
+                  </Form.Item>
+                </Col>
 
-
-            <Input type='text' value={dps} onChange={(e) => setDps(e.target.value)} />
-
-            <Input type='text' value={dph} onChange={(e) => setDph(e.target.value)} />
-
-            <Input type='text' value={aps} onChange={(e) => setAps(e.target.value)} />
-
-            <Input type='text' value={dhe} onChange={(e) => setDhe(e.target.value)} />
-
-            <Button type='primary' size='large' onClick={() => handleSubmitAttribute()}>Generate Attribute</Button>
+              </Row>
+              <Button
+                loading={isGeneratingAttribute}
+                size='large'
+                type='primary'
+                htmlType='submit'
+              >Generate Attributes</Button>
+            </Form>
            
           </Card>
         </Col>
@@ -127,7 +154,7 @@ export default function Home() {
             }
             <Divider />
             {
-              response.map(i => (<p>{i}</p>))
+              responseAtt.map(i => (<p>{i}</p>))
             }
 
             <Row gutter={8}>
