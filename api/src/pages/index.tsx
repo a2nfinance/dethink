@@ -1,11 +1,25 @@
+import { AttributesForm } from '@/components/AttributesForm';
 import { Card, Form, Input, Row, Col, Button, Divider, Image, Select } from 'antd';
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import React from 'react';
 import { size } from 'viem';
+import {
+  useAccount,
+  useConnect,
+  useDisconnect,
+  useEnsAvatar,
+  useEnsName,
+} from 'wagmi'
 
 const { Option } = Select;
 
+
 export default function Home() {
+  const [client, setClient] = useState(false);
+  const { address, connector, isConnected } = useAccount();
+
+  const { connect, connectors, error, isLoading, pendingConnector } = useConnect()
+
   const [response, setResponse] = useState([]);
   const [responseAtt, setResponseAtt] = useState([]);
   const [isGeneratingImage, setIsGenratingImage] = useState(false);
@@ -55,7 +69,7 @@ export default function Home() {
     } catch (e) {
       console.log("Error occured:", e);
     }
-    
+
   }
 
   const onFinishImage = (values: any) => {
@@ -67,43 +81,46 @@ export default function Home() {
     const { dps, dph, aps, dhe } = values;
     getAttribute(dps, dph, aps, dhe);
   }
+  useEffect( () => {
+    console.log("First Load")
+  }, [])
+  if (isConnected) {
+    return (
+      <div style={{ width: 1024, marginLeft: "auto", marginRight: "auto" }}>
+        <Row gutter={8}>
+          <Col span={14}>
+            <Card title={"Image settings"}>
+              <Form onFinish={onFinishImage} layout='vertical'>
+                <Row gutter={12}>
+                  <Col span={12}>
+                    <Form.Item name={"prompt"} label="Prompt" rules={[{ required: true, message: 'Missing first input' }]}>
+                      <Input size='large'
+                        type='text'
+                      />
+                    </Form.Item>
 
-  return (
-    <div style={{ width: 1024, marginLeft: "auto", marginRight: "auto" }}>
-      <Row gutter={8}>
-        <Col span={14}>
-          <Card title={"Item settings"}>
-            <Form onFinish={onFinishImage} layout='vertical'>
-              <Row gutter={12}>
-                <Col span={12}>
-                  <Form.Item name={"prompt"} label="Prompt" rules={[{ required: true, message: 'Missing first input' }]}>
-                    <Input size='large'
-                      type='text'
-                    />
-                  </Form.Item>
+                  </Col>
+                  <Col span={12}>
+                    <Form.Item name={"size"} label="Resolution" >
+                      <Select size='large'
+                      >
+                        <Option size="1024x1024">1024x1024</Option>
+                        <Option size="1792x1024">1792x1024</Option>
+                        <Option size="1024x1792">1024x1792</Option>
+                      </Select>
+                    </Form.Item>
+                  </Col>
 
-                </Col>
-                <Col span={12}>
-                  <Form.Item name={"size"} label="Resolution" >
-                    <Select size='large' type='text'
-                    >
-                      <Option size="1024x1024">1024x1024</Option>
-                      <Option size="1792x1024">1792x1024</Option>
-                      <Option size="1024x1792">1024x1792</Option>
-                    </Select>
-                  </Form.Item>
-                </Col>
-
-              </Row>
-              <Button
-                loading={isGeneratingImage}
-                size='large'
-                type='primary'
-                htmlType='submit'
-              >Send Prompt</Button>
-            </Form>
-            <br/>
-            <Form onFinish={onFinishAttribute} layout='vertical'>
+                </Row>
+                <Button
+                  loading={isGeneratingImage}
+                  size='large'
+                  type='primary'
+                  htmlType='submit'
+                >Send Prompt</Button>
+              </Form>
+              <br />
+              {/* <Form onFinish={onFinishAttribute} layout='vertical'>
               <Row gutter={12}>
                 <Col span={12}>
                   <Form.Item name={"dps"} label="Attribute 1" rules={[{ required: true, message: 'Missing first input' }]}>
@@ -141,38 +158,64 @@ export default function Home() {
                 type='primary'
                 htmlType='submit'
               >Generate Attributes</Button>
-            </Form>
-           
-          </Card>
-        </Col>
-        <Col span={10}>
-          <Card title="Generated item">
+            </Form> */}
 
-            {
-              response.map(r => <Image src={r} />)
-            }
+
+            </Card>
             <Divider />
-            {
-              responseAtt.map(i => (<p>{i}</p>))
-            }
+            <Card title={"Attribute settings"}>
+              <AttributesForm />
+            </Card>
+          </Col>
+          <Col span={10}>
+            <Card title="Generated item">
 
-            <Row gutter={8}>
-              <Col span={8}>
-                <Button type='primary' style={{ width: "100%" }}>Save</Button>
-              </Col>
-              <Col span={8}>
-                <Button style={{ width: "100%" }}>Mint NFT</Button>
-              </Col>
-              <Col span={8}>
-                <Button style={{ width: "100%" }}>Clear</Button>
-              </Col>
-            </Row>
-          </Card>
-        </Col>
-      </Row>
+              {
+                response.map(r => <Image src={r} />)
+              }
+              <Divider />
+              {
+                responseAtt.map(i => (<p>{i}</p>))
+              }
+
+              <Row gutter={8}>
+                <Col span={8}>
+                  <Button type='primary' style={{ width: "100%" }}>Save</Button>
+                </Col>
+                <Col span={8}>
+                  <Button style={{ width: "100%" }}>Mint NFT</Button>
+                </Col>
+                <Col span={8}>
+                  <Button style={{ width: "100%" }}>Clear</Button>
+                </Col>
+              </Row>
+            </Card>
+          </Col>
+        </Row>
 
 
+        <div>{address}</div>
+      </div>
+    )
+  }
 
+  return (
+    <div>
+      {connectors.map((connector) => (
+        <Button
+          size="large"
+          type="primary"
+          disabled={!connector.ready}
+          key={connector.id}
+          loading={isLoading &&
+            connector.id === pendingConnector?.id}
+          onClick={() => connect({ connector })}
+        >
+          {!connector?.ready ? `${connector?.name} (unsupported)` : connector?.name}
+        </Button>
+      ))}
+
+      {error && <div>{error.message}</div>}
     </div>
   )
 }
