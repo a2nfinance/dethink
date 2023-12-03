@@ -1,16 +1,11 @@
-import { Card, Form, Input, Row, Col, Button, Divider, Image } from 'antd';
-// import { Inter } from 'next/font/google'
-import { useCallback, useState } from 'react'
+import { Card, Form, Input, Row, Col, Button, Divider, Image, Select } from 'antd';
+import { useState } from 'react'
+import React from 'react';
+import { size } from 'viem';
 
-// const inter = Inter({ subsets: ['latin'] })
+const { Option } = Select;
 
 export default function Home() {
-  const prompt = useState("");
-  const size = useState("");
-  const [dps, setDps] = useState("");
-  const [dph, setDph] = useState("");
-  const [aps, setAps] = useState("");
-  const [dhe, setDhe] = useState("");
   const [response, setResponse] = useState([]);
   const [responseAtt, setResponseAtt] = useState([]);
   const [isGeneratingImage, setIsGenratingImage] = useState(false);
@@ -89,9 +84,13 @@ export default function Home() {
 
                 </Col>
                 <Col span={12}>
-                  <Form.Item name={"size"} label="Resolution" rules={[{ required: true, message: 'Missing first input' }]}>
-                    <Input size='large' type='text'
-                    />
+                  <Form.Item name={"size"} label="Resolution" >
+                    <Select size='large' type='text'
+                    >
+                      <Option size="1024x1024">1024x1024</Option>
+                      <Option size="1792x1024">1792x1024</Option>
+                      <Option size="1024x1792">1024x1792</Option>
+                    </Select>
                   </Form.Item>
                 </Col>
 
