@@ -21,9 +21,9 @@ export default function Home() {
   const { connect, connectors, error, isLoading, pendingConnector } = useConnect()
 
   const [response, setResponse] = useState([]);
-  const [responseAtt, setResponseAtt] = useState([]);
+  // const [responseAtt, setResponseAtt] = useState([]);
   const [isGeneratingImage, setIsGenratingImage] = useState(false);
-  const [isGeneratingAttribute, setIsGenratingAttribute] = useState(false);
+  // const [isGeneratingAttribute, setIsGenratingAttribute] = useState(false);
 
   // Get images from API using the POST method
   async function getImage(prompt: string, size: string) {
@@ -48,7 +48,8 @@ export default function Home() {
 
   }
 
-  async function getAttribute(dps: string, dph: string, aps: string, dhe: string) {
+  /*
+  async function getAttribute(message: String) {
     try {
       setIsGenratingAttribute(true);
       let getReq = await fetch("/api/get-attributes", {
@@ -57,10 +58,7 @@ export default function Home() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          dps: dps,
-          dph: dph,
-          aps: aps,
-          dhe: dhe,
+          message: message,
         })
       })
       let res = await getReq.json();
@@ -71,16 +69,17 @@ export default function Home() {
     }
 
   }
-
+  */
   const onFinishImage = (values: any) => {
     const { prompt, size } = values;
     getImage(prompt, size);
   }
-
+  /*
   const onFinishAttribute = (values: any) => {
-    const { dps, dph, aps, dhe } = values;
-    getAttribute(dps, dph, aps, dhe);
+    const { message } = values;
+    getAttribute(message);
   }
+  */
   useEffect( () => {
     console.log("First Load")
   }, [])
@@ -167,6 +166,7 @@ export default function Home() {
               <AttributesForm />
             </Card>
           </Col>
+          
           <Col span={10}>
             <Card title="Generated item">
 
@@ -175,7 +175,7 @@ export default function Home() {
               }
               <Divider />
               {
-                responseAtt.map(i => (<p>{i}</p>))
+                // responseAtt.map(i => (<p>{i}</p>))
               }
 
               <Row gutter={8}>
