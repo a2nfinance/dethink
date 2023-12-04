@@ -1,18 +1,34 @@
 import OpenAI from "openai";
 
+// Create a prompt element
+export const getPromptElement = (typeAtt, nameAtt, minValue, maxValue) => {
+  let pe
+  switch(typeAtt) {
+    case 'integer':
+      pe = `${nameAtt}: an integer ranging from ${minValue} to ${maxValue}, \n`
+      break;
+    case 'range':
+      pe = `${nameAtt}: a subinterval of the interval [${minValue}, ${maxValue}], \n`
+      break;
+    case 'float':
+      pe = `${nameAtt}: a float ranging from ${minValue} to ${maxValue} rounded to 2, \n`
+      break;
+    case 'percent':
+      pe = `${nameAtt}: a string of plus percentage that less than +${maxValue} %, more than +${minValue}%, \n` 
+      break;
+  };
+  return pe;
+}
+
 const openai = new OpenAI({
-  apiKey: "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"
+  apiKey: "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", dangerouslyAllowBrowser: true
 });
 
 // Create functions to generate a prompt to attributes.
-export const getAttributes = async(dps, dph, aps, dhe) => { 
+export const getAttributes = async(message) => { 
   const completion = await openai.chat.completions.create({
     messages: [
-        {"role": "user", "content": `Let's create an output of JSON (no any explainations) that name-value pairs as follows:
-        ${dps}: an integer ranging from 700 to 900,
-        ${dph}: a random subinterval of the interval [600, 1000], 
-        ${aps}: a float ranging from 1 to 2 rounded to 2,
-        ${dhe}: a string of plus percentage that less than +30%, more than +20%.` 
+        {"role": "user", "content": message
         },
         ],
     model: "gpt-3.5-turbo",
@@ -20,5 +36,3 @@ export const getAttributes = async(dps, dph, aps, dhe) => {
 
   return [completion.choices[0].message.content];
 }
-
-// console.log(await getAttributes ("Damage per Second", "Damage per Hit", "Attacks per Second", "Damage to Healthy Enemies"));
