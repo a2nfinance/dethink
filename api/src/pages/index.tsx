@@ -81,9 +81,10 @@ export default function Home() {
   }
   */
   useEffect( () => {
+    setClient(true);
     console.log("First Load")
   }, [])
-  if (isConnected) {
+  if (isConnected && client) {
     return (
       <div style={{ width: 1024, marginLeft: "auto", marginRight: "auto" }}>
         <Row gutter={8}>
@@ -200,7 +201,7 @@ export default function Home() {
   }
 
   return (
-    <div>
+    client && <div>
       {connectors.map((connector) => (
         <Button
           size="large"
