@@ -22,7 +22,7 @@ contract GenerateImagesFunctionsConsumer is FunctionsClient, ConfirmedOwner {
 
   // Custom error type
   error UnexpectedRequestID(bytes32 requestId);
-  event Attributes(string latestResult);
+  event Attributes(byte32 indexed requestId, string latestResult);
   event OCRResponse(bytes32 indexed requestId, bytes result, bytes err);
 
   // Step 1: Init contract with function router --- Avalanche Fuji
@@ -44,7 +44,7 @@ contract GenerateImagesFunctionsConsumer is FunctionsClient, ConfirmedOwner {
   function _sendRequestWithoutCBOR(string memory _prompt, string memory _size) internal onlyOwner returns (bytes32) {
     FunctionsRequest.Request memory req;
     req.initializeRequest(FunctionsRequest.Location.Inline, FunctionsRequest.CodeLanguage.JavaScript, source);
-    string[] memory args = new string[](1);
+    string[] memory args = new string[](2);
     args[0] = _prompt;
     args[1] = _size;
     if (args.length > 1) req.setArgs(args);
@@ -53,8 +53,6 @@ contract GenerateImagesFunctionsConsumer is FunctionsClient, ConfirmedOwner {
     latestRequestId = assignedReqID;
     return assignedReqID;
   }
-
-  
 
   /**
    * @notice Store latest result/error
@@ -69,7 +67,7 @@ contract GenerateImagesFunctionsConsumer is FunctionsClient, ConfirmedOwner {
     latestError = err;
     emit OCRResponse(requestId, response, err);
     latestResult = string(abi.encodePacked(response));
-    emit Attributes(latestResult);
+    emit Attributes(requestId, latestResult);
   }
 
   /**

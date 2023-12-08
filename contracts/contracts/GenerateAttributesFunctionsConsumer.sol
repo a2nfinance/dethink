@@ -22,7 +22,7 @@ contract GenerateAttributesFunctionsConsumer is FunctionsClient, ConfirmedOwner 
 
   // Custom error type
   error UnexpectedRequestID(bytes32 requestId);
-  event Attributes(string latestResult);
+  event Attributes(byte32 indexed requestId, string latestResult);
   event OCRResponse(bytes32 indexed requestId, bytes result, bytes err);
 
   // Step 1: Init contract with function router --- Avalanche Fuji
@@ -68,7 +68,7 @@ contract GenerateAttributesFunctionsConsumer is FunctionsClient, ConfirmedOwner 
     latestError = err;
     emit OCRResponse(requestId, response, err);
     latestResult = string(abi.encodePacked(response));
-    emit Attributes(latestResult);
+    emit Attributes(requestId, latestResult);
   }
 
   /**
