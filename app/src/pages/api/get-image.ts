@@ -14,6 +14,8 @@ export default async function handler(
         if (req.method === 'POST') {
             // need to validate
             if (req.body) {
+                console.log("Results:", req.body);
+                const results = JSON.parse(req.body); // Parse data when receiving request from CL functions.
                 // Call a core function to generate images from the request prompt.
                 const imageURLs = await generateImages(req.body.prompt);
                 res.status(200).send({ success: true, data: imageURLs });
