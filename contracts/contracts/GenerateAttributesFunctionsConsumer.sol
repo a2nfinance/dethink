@@ -8,7 +8,7 @@ import {FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/dev/v1_0
 /**
  * @title Chainlink Functions example on-demand consumer contract example
  */
-contract FunctionsConsumer is FunctionsClient, ConfirmedOwner {
+contract GenerateAttributesFunctionsConsumer is FunctionsClient, ConfirmedOwner {
   using FunctionsRequest for FunctionsRequest.Request;
   string public source;
   uint64 public subscriptionId;
@@ -18,11 +18,11 @@ contract FunctionsConsumer is FunctionsClient, ConfirmedOwner {
   bytes32 public latestRequestId;
   bytes public latestResponse;
   bytes public latestError;
-  string public latestName;
+  string public latestResult;
 
   // Custom error type
   error UnexpectedRequestID(bytes32 requestId);
-  event SuperHeroName(string name);
+  event Attributes(string latestResult);
   event OCRResponse(bytes32 indexed requestId, bytes result, bytes err);
 
   // Step 1: Init contract with function router --- Avalanche Fuji
@@ -67,15 +67,15 @@ contract FunctionsConsumer is FunctionsClient, ConfirmedOwner {
     latestResponse = response;
     latestError = err;
     emit OCRResponse(requestId, response, err);
-    latestName = string(abi.encodePacked(response));
-    emit SuperHeroName(latestName);
+    latestResult = string(abi.encodePacked(response));
+    emit Attributes(latestResult);
   }
 
   /**
-   * Step 3: To send request to get image.
+   * Step 3: To send request to get attributes.
    * @param _prompt AI command
    */
-  function getImage(string memory _prompt) external {
+  function getAttribute(string memory _prompt) external {
     _sendRequestWithoutCBOR(_prompt);
   }
 }
