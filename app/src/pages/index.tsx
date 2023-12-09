@@ -12,6 +12,7 @@ import {
   useEnsAvatar,
   useEnsName,
 } from 'wagmi'
+import { ReturnType, decodeResult } from '@chainlink/functions-toolkit';
 
 const { Option } = Select;
 
@@ -34,7 +35,14 @@ export default function Home() {
     abi: generateAttributesABI,
     eventName: 'Attributes',
     listener(log) {
-      console.log(log)
+      // @ts-ignore
+      console.log(log[0].args.response);
+      const returnType = ReturnType.string;
+      const decodedResponse = decodeResult(
+        // @ts-ignore
+        log[0].args.response,
+        returnType
+      );
     },
   })
 
@@ -93,7 +101,7 @@ export default function Home() {
     getAttribute(message);
   }
   */
-  useEffect( () => {
+  useEffect(() => {
     setClient(true);
     console.log("First Load")
   }, [])
@@ -183,7 +191,7 @@ export default function Home() {
               <AttributesForm />
             </Card>
           </Col>
-          
+
           <Col span={10}>
             <Card title="Generated item">
 
