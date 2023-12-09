@@ -52,27 +52,8 @@
       },
       {
         "indexed": false,
-        "internalType": "string",
-        "name": "latestResult",
-        "type": "string"
-      }
-    ],
-    "name": "Attributes",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "bytes32",
-        "name": "requestId",
-        "type": "bytes32"
-      },
-      {
-        "indexed": false,
         "internalType": "bytes",
-        "name": "result",
+        "name": "response",
         "type": "bytes"
       },
       {
@@ -82,7 +63,7 @@
         "type": "bytes"
       }
     ],
-    "name": "OCRResponse",
+    "name": "Attributes",
     "type": "event"
   },
   {
@@ -252,19 +233,6 @@
         "internalType": "bytes",
         "name": "",
         "type": "bytes"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "latestResult",
-    "outputs": [
-      {
-        "internalType": "string",
-        "name": "",
-        "type": "string"
       }
     ],
     "stateMutability": "view",
