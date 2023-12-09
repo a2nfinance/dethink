@@ -9,9 +9,7 @@ export default async function handler(
         if (req.method === 'POST') {
             // need to validate
             if (req.body) {
-                console.log("Results:", req.body);
                 const data = JSON.parse(req.body);
-                console.log(data);
                 const completion = await openai.chat.completions.create({
                     messages: [
                         { role: "user", content: data.prompt }
@@ -21,7 +19,7 @@ export default async function handler(
 
                 console.log(completion.choices[0].message.content);
 
-                res.status(200).send({response: completion.choices[0].message.content});
+                res.status(200).send(completion.choices[0].message.content);
             } else {
                 res.status(422).send({response: ""});
             }
