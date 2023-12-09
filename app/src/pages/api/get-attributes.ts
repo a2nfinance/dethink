@@ -1,30 +1,34 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import { generateItemAttributes } from '@/core/generate-item-attributes';
 import type { NextApiRequest, NextApiResponse } from 'next'
-
-type Data = {
-    success: boolean,
-    data?: any // '?' : Optional attribute
-}
-
+import OpenAI from 'openai';
+import dotenv from "dotenv";
+dotenv.config();
+const openai = new OpenAI({ apiKey: process.env.OPENAI_KEY, dangerouslyAllowBrowser: true });
 export default async function handler(
     req: NextApiRequest,
-    res: NextApiResponse<Data>
+    res: NextApiResponse<any>
 ) {
     try {
         if (req.method === 'POST') {
             // need to validate
             if (req.body) {
-                // Call a core function to generate images from the request prompt.
-                const attributes = await generateItemAttributes(req.body.message);
-                res.status(200).send({ success: true, data: attributes });
+                console.log("Results:", req.body);
+                const data = JSON.parse(req.body);
+                const completion = await openai.chat.completions.create({
+                    messages: [
+                        { role: "user", content: data.prompt }
+                    ],
+                    model: "gpt-3.5-turbo",
+                });
+
+                res.status(200).send(completion.choices[0].message.content);
             } else {
-                res.status(422).send({ success: false });
+                res.status(422).send("");
             }
         } else {
-            res.status(422).send({ success: false });
+            res.status(422).send("");
         }
     } catch (e) {
-        res.status(500).send({success: false});
+        console.log(e);
+        res.status(500).send("");
     }
 }

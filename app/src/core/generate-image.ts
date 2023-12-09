@@ -1,4 +1,4 @@
-import { getImages } from '../../../backend/prompt2Images.js';
+// import { getImages } from '../../../backend/prompt2Images.js';
 
 
 // Create a prompt element
@@ -23,7 +23,7 @@ export const getPromptElement = async(typeAtt:String, nameAtt:String, minValue:S
   
 export const generateImages = async (prompt: string, size: string) => {
     // load model
-    return [await getImages(prompt, size)]
+    // return [await getImages(prompt, size)]
     
     // change settings
     // generate images to folder
