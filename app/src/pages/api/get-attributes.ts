@@ -19,7 +19,7 @@ export default async function handler(
 
                 console.log(completion.choices[0].message.content);
 
-                res.status(200).send(completion.choices[0].message.content);
+                res.status(200).send({response: completion.choices[0].message.content});
             } else {
                 res.status(422).send({response: ""});
             }
