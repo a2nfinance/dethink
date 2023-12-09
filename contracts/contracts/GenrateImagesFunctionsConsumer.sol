@@ -22,7 +22,7 @@ contract GenerateImagesFunctionsConsumer is FunctionsClient, ConfirmedOwner {
 
   // Custom error type
   error UnexpectedRequestID(bytes32 requestId);
-  event Attributes(bytes32 indexed requestId, string latestResult);
+  event Images(bytes32 indexed requestId, string latestResult);
   event OCRResponse(bytes32 indexed requestId, bytes result, bytes err);
 
   // Step 1: Init contract with function router --- Avalanche Fuji
@@ -63,11 +63,12 @@ contract GenerateImagesFunctionsConsumer is FunctionsClient, ConfirmedOwner {
    */
 
   function fulfillRequest(bytes32 requestId, bytes memory response, bytes memory err) internal override {
-    latestResponse = response;
-    latestError = err;
-    emit OCRResponse(requestId, response, err);
-    latestResult = string(abi.encodePacked(response));
-    emit Attributes(requestId, latestResult);
+    if (s_lastRequestId != requestId) {
+      revert UnexpectedRequestID(requestId);
+    }
+    s_lastResponse = response;
+    s_lastError = err;
+    emit Images(requestId, s_lastResponse);
   }
 
   /**

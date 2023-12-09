@@ -53,8 +53,6 @@ contract GenerateAttributesFunctionsConsumer is FunctionsClient, ConfirmedOwner 
     return assignedReqID;
   }
 
-  
-
   /**
    * @notice Store latest result/error
    * @param requestId The request ID, returned by sendRequest()
@@ -64,11 +62,12 @@ contract GenerateAttributesFunctionsConsumer is FunctionsClient, ConfirmedOwner 
    */
 
   function fulfillRequest(bytes32 requestId, bytes memory response, bytes memory err) internal override {
-    latestResponse = response;
-    latestError = err;
-    emit OCRResponse(requestId, response, err);
-    latestResult = string(abi.encodePacked(response));
-    emit Attributes(requestId, latestResult);
+    if (s_lastRequestId != requestId) {
+      revert UnexpectedRequestID(requestId);
+    }
+    s_lastResponse = response;
+    s_lastError = err;
+    emit Attributes(requestId, s_lastResponse);
   }
 
   /**

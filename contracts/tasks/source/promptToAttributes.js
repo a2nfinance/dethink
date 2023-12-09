@@ -10,6 +10,7 @@ const req = Functions.makeHttpRequest({
 });
 
 const res = await req;
+
 if (res.error) {
     console.error(
         res.response
