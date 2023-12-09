@@ -1,11 +1,4 @@
-// All supported networks and related contract addresses are defined here.
-//
-// LINK token addresses: https://docs.chain.link/resources/link-token-contracts/
-// Price feeds addresses: https://docs.chain.link/data-feeds/price-feeds/addresses
-// Chain IDs: https://chainlist.org/?testnets=true
-
 require("@chainlink/env-enc").config()
-require("dotenv").config()
 
 const DEFAULT_VERIFICATION_BLOCK_CONFIRMATIONS = 2
 

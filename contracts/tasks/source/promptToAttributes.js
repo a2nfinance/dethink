@@ -1,30 +1,24 @@
-const prompt = args[0]
+// const prompt = args[0]
+// const url = "https://localhost:3000";
+// const req = Functions.makeHttpRequest({
+//   url: url,
+//   method: "POST",
+//   headers: {
+//     "Content-Type": "application/json",
+//   },
+//   data: JSON.stringify({prompt: prompt})
+// });
 
-if (
-    !secrets.openaiKey
-) {
-    throw Error(
-        "Need to set OPENAI_KEY environment variable"
-    )
-};
+// const res = await req;
+// if (res.error) {
+//     console.error(
+//         res.response
+//           ? `${res.response.status},${res.response.statusText}`
+//           : ""
+//       );
+//       throw Error("Request failed");
+// }
 
-const openAIRequest = Functions.makeHttpRequest({
-    url: "https://api.openai.com/v1/chat/completions",
-    method: "POST",
-    headers: {
-        'Authorization': `Bearer ${secrets.openaiKey}`
-    },
-    data: { "model": "gpt-3.5-turbo", 
-            "messages": [
-                {"role": "user", "content": prompt},
-                ],
-            },
-});
+// return Functions.encodeString(JSON.stringify(res["data"]));
 
-const [openAiResponse] = await Promise.all([
-    openAIRequest
-]);
-console.log("raw response", openAiResponse);
-
-const result = openAiResponse.data.choices[0].message.content;
-return Functions.encodeString(result);
+return Functions.encodeString(JSON.stringify("TEST DATA"));

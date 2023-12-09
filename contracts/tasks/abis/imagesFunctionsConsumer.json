@@ -52,6 +52,25 @@
         },
         {
           "indexed": false,
+          "internalType": "string",
+          "name": "latestResult",
+          "type": "string"
+        }
+      ],
+      "name": "Attributes",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "requestId",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
           "internalType": "bytes",
           "name": "result",
           "type": "bytes"
@@ -131,19 +150,6 @@
       "type": "event"
     },
     {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": false,
-          "internalType": "string",
-          "name": "name",
-          "type": "string"
-        }
-      ],
-      "name": "SuperHeroName",
-      "type": "event"
-    },
-    {
       "inputs": [],
       "name": "acceptOwnership",
       "outputs": [],
@@ -182,9 +188,14 @@
           "internalType": "string",
           "name": "_prompt",
           "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_size",
+          "type": "string"
         }
       ],
-      "name": "getImage",
+      "name": "getAttribute",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -227,19 +238,6 @@
     },
     {
       "inputs": [],
-      "name": "latestName",
-      "outputs": [
-        {
-          "internalType": "string",
-          "name": "",
-          "type": "string"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
       "name": "latestRequestId",
       "outputs": [
         {
@@ -259,6 +257,19 @@
           "internalType": "bytes",
           "name": "",
           "type": "bytes"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "latestResult",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
         }
       ],
       "stateMutability": "view",

@@ -22,7 +22,7 @@ contract GenerateAttributesFunctionsConsumer is FunctionsClient, ConfirmedOwner 
 
   // Custom error type
   error UnexpectedRequestID(bytes32 requestId);
-  event Attributes(byte32 indexed requestId, string latestResult);
+  event Attributes(bytes32 indexed requestId, string latestResult);
   event OCRResponse(bytes32 indexed requestId, bytes result, bytes err);
 
   // Step 1: Init contract with function router --- Avalanche Fuji
