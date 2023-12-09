@@ -19,7 +19,7 @@ export default async function handler(
                     model: "gpt-3.5-turbo",
                 });
 
-                console.log(completion);
+                console.log(completion.choices[0].message.content);
 
                 res.status(200).send(completion.choices[0].message.content);
             } else {
