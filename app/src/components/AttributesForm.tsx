@@ -1,6 +1,5 @@
 import { Button, Form, Input, Select, Space, Col, Card } from "antd"
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons"
-import { getPromptElement } from "../../../backend/prompt2Attributes"
 import { useState, useEffect } from 'react'
 
 export const AttributesForm = () => {
@@ -31,8 +30,8 @@ export const AttributesForm = () => {
     const onFinish = (values: any) => {
         var message = new String(`Let's create an output of JSON (no any explanations) that name-value pairs as follows: \n`);
         // console.log(values.attributes);
-        values.attributes.forEach(element => message = message.concat(getPromptElement({element}.element.attribute_type, {element}.element.name, {element}.element.minValue, {element}.element.maxValue)));
-        getAttribute(message);
+        // values.attributes.forEach(element => message = message.concat(getPromptElement({element}.element.attribute_type, {element}.element.name, {element}.element.minValue, {element}.element.maxValue)));
+        // getAttribute(message);
         console.log(message);
     };
         
