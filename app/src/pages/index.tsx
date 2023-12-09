@@ -34,11 +34,12 @@ export default function Home() {
     abi: generateAttributesABI,
     eventName: 'Attributes',
     listener(log) {
+      console.log(log);
       // @ts-ignore
-      console.log(log[0].args.response);
+      //console.log(log[0].args.response);
        // @ts-ignore
-      const response = String.fromCharCode(log[0].args.response);
-      console.log("STRING RESPONSE:", response);
+      //const response = String.fromCharCode(log[0].args.response);
+      //console.log("STRING RESPONSE:", response);
     },
   })
 
