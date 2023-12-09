@@ -11,12 +11,15 @@ export default async function handler(
             if (req.body) {
                 console.log("Results:", req.body);
                 const data = JSON.parse(req.body);
+                console.log(data);
                 const completion = await openai.chat.completions.create({
                     messages: [
                         { role: "user", content: data.prompt }
                     ],
                     model: "gpt-3.5-turbo",
                 });
+
+                console.log(completion);
 
                 res.status(200).send(completion.choices[0].message.content);
             } else {
