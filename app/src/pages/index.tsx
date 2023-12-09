@@ -2,10 +2,12 @@ import { AttributesForm } from '@/components/AttributesForm';
 import { Card, Form, Input, Row, Col, Button, Divider, Image, Select } from 'antd';
 import { useState, useEffect } from 'react'
 import React from 'react';
-import { size } from 'viem';
+import generateAttributesABI from "@/abis/attributesFunctionsConsumer.json";
+import generateImagesABI from "@/abis/imagesFunctionsConsumer.json";
 import {
   useAccount,
   useConnect,
+  useContractEvent,
   useDisconnect,
   useEnsAvatar,
   useEnsName,
@@ -24,6 +26,17 @@ export default function Home() {
   // const [responseAtt, setResponseAtt] = useState([]);
   const [isGeneratingImage, setIsGenratingImage] = useState(false);
   // const [isGeneratingAttribute, setIsGenratingAttribute] = useState(false);
+
+
+  useContractEvent({
+    //@ts-ignore
+    address: process.env.NEXT_PUBLIC_ATTRIBUTES_CONTRACT,
+    abi: generateAttributesABI,
+    eventName: 'Attributes',
+    listener(log) {
+      console.log(log)
+    },
+  })
 
   // Get images from API using the POST method
   async function getImage(prompt: string, size: string) {
@@ -84,6 +97,9 @@ export default function Home() {
     setClient(true);
     console.log("First Load")
   }, [])
+
+
+
   if (isConnected && client) {
     return (
       <div style={{ width: 1024, marginLeft: "auto", marginRight: "auto" }}>
