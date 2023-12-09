@@ -12,7 +12,6 @@ import {
   useEnsAvatar,
   useEnsName,
 } from 'wagmi'
-import { ReturnType, decodeResult } from '@chainlink/functions-toolkit';
 
 const { Option } = Select;
 
@@ -37,12 +36,9 @@ export default function Home() {
     listener(log) {
       // @ts-ignore
       console.log(log[0].args.response);
-      const returnType = ReturnType.string;
-      const decodedResponse = decodeResult(
-        // @ts-ignore
-        log[0].args.response,
-        returnType
-      );
+       // @ts-ignore
+      const response = String.fromCharCode(log[0].args.response);
+      console.log("STRING RESPONSE:", response);
     },
   })
 
