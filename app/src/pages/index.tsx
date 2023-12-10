@@ -111,9 +111,16 @@ export default function Home() {
     })
 
     imagesContract.on("Images", async (requestId, latestResponse, latestError) => {
-      const responseJson = JSON.parse(fromHex(latestResponse, "string"));
-      const response = responseJson.response;
-      setImage(response);
+      try {
+        console.log(latestResponse);
+        const responseJson = JSON.parse(fromHex(latestResponse, "string"));
+        console.log(responseJson);
+        const response = responseJson.response;
+        setImage(response);
+      } catch(e) {
+        console.log(e);
+      }
+   
       setIsGenratingImage(false);
     })
   }, [chain?.id])
@@ -136,11 +143,11 @@ export default function Home() {
                   </Col>
                   <Col span={12}>
                     <Form.Item name={"size"} label="Resolution" >
-                      <Select size='large'>
-                        <Option size="1024x1024">1024x1024</Option>
-                        <Option size="1792x1024">1792x1024</Option>
-                        <Option size="1024x1792">1024x1792</Option>
-                      </Select>
+                      <Select size='large' options={[
+                        { label: "1024x1024", value: "1024x1024" },
+                        { label: "1792x1024", value: "1792x1024" },
+                        { label: "1024x1792", value: "1024x1792" }
+                      ]} />
                     </Form.Item>
                   </Col>
 
