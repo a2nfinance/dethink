@@ -6,7 +6,7 @@
 
 ## Chainlink Subscriptions
 
-|       Subscription ID |
+|       | Subscription ID |
 | ----------- | ----------- | 
 | Fuji      |  [1867](https://functions.chain.link/fuji/1867)       |
 
