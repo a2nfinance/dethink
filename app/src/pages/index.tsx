@@ -1,5 +1,5 @@
 import { AttributesForm } from '@/components/AttributesForm';
-import { Card, Form, Input, Row, Col, Button, Divider, Image, Select, Space, Table } from 'antd';
+import { Card, Form, Input, Row, Col, Button, Divider, Image, Select, Space, Table, Layout, Typography, Alert } from 'antd';
 import { useState, useEffect, useCallback } from 'react'
 import generateAttributesABI from "@/abis/attributesFunctionsConsumer.json";
 import generateImagesABI from "@/abis/imagesFunctionsConsumer.json";
@@ -17,11 +17,12 @@ import { fromHex } from 'viem';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { getPromptElement } from '@/core/generate-item-attributes';
 import { attributeContract, getGenerateAttConfig, getGenerateImageConfig, imagesContract } from '@/core/call-contract';
+import { ConnectWalletStyle } from '@/styles/wallet';
 const { Option } = Select;
-
+const { Header, Content } = Layout;
 const attContractAddress = process.env.NEXT_PUBLIC_ATTRIBUTES_CONTRACT;
 const imageContractAddress = process.env.NEXT_PUBLIC_IMAGE_CONTRACT;
-
+const { Title, Text } = Typography;
 export default function Home() {
 
   const [client, setClient] = useState(false);
@@ -117,10 +118,10 @@ export default function Home() {
         console.log(responseJson);
         const response = responseJson.response;
         setImage(response);
-      } catch(e) {
+      } catch (e) {
         console.log(e);
       }
-   
+
       setIsGenratingImage(false);
     })
   }, [chain?.id])
@@ -128,9 +129,10 @@ export default function Home() {
   if (isConnected && client) {
     return (
       <div style={{ width: 1024, marginLeft: "auto", marginRight: "auto" }}>
+
         <Row gutter={8}>
           <Col span={14}>
-            <Card title={"Image settings"}>
+            <Card title={"Image settings"} headStyle={{ backgroundColor: "#1677ff", color: "whitesmoke" }}>
               <Form onFinish={(values) => onFinishImage(values)} layout='vertical'>
                 <Row gutter={12}>
                   <Col span={12}>
@@ -160,7 +162,7 @@ export default function Home() {
               </Form>
             </Card>
             <Divider />
-            <Card title={"Attribute settings"}>
+            <Card title={"Attribute settings"} headStyle={{ backgroundColor: "#1677ff", color: "whitesmoke" }}>
               <Form
                 name="dynamic_form_nest_item"
                 onFinish={(values) => onFinishAttributeForm(values)}
@@ -220,7 +222,7 @@ export default function Home() {
                   )}
                 </Form.List>
                 <Form.Item>
-                  <Button loading={isGeneratingAttribute} type="primary" htmlType="submit">
+                  <Button size='large' loading={isGeneratingAttribute} type="primary" htmlType="submit">
                     Submit
                   </Button>
                 </Form.Item>
@@ -230,7 +232,7 @@ export default function Home() {
           </Col>
 
           <Col span={10}>
-            <Card title="Generated item">
+            <Card title="Generated item" headStyle={{ backgroundColor: "#1677ff", color: "whitesmoke" }}>
 
               {
                 image ? <Image src={`${image}`} /> : <></>
@@ -270,22 +272,29 @@ export default function Home() {
   }
 
   return (
-    client && <div>
-      {connectors.map((connector) => (
-        <Button
-          size="large"
-          type="primary"
-          disabled={!connector.ready}
-          key={connector.id}
-          loading={isLoading &&
-            connector.id === pendingConnector?.id}
-          onClick={() => connect({ connector })}
-        >
-          {!connector?.ready ? `${connector?.name} (unsupported)` : connector?.name}
-        </Button>
-      ))}
+    client && <Card
+      //@ts-ignore
+      style={ConnectWalletStyle}>
+      <Space direction="vertical" style={{ width: "100%", textAlign: "center" }}>
+        <Title level={3}>DETHINK</Title>
+        <Text>Revolutionizing Automated In-Game Asset Generation with Chainlink Functions!</Text>
+        {connectors.map((connector) => (
+          <Button
+            style={{ width: "100%" }}
+            size="large"
+            type="primary"
+            disabled={!connector.ready}
+            key={connector.id}
+            loading={isLoading &&
+              connector.id === pendingConnector?.id}
+            onClick={() => connect({ connector })}
+          >
+            {!connector?.ready ? `${connector?.name} (unsupported)` : connector?.name}
+          </Button>
+        ))}
 
-      {error && <div>{error.message}</div>}
-    </div>
+        {error && <Alert type="error" message={error.message} showIcon />}
+      </Space>
+    </Card>
   )
 }
