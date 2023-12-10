@@ -1,5 +1,5 @@
 ## Overview
-DeThink - Generate in-game items automatically using shapes and attributes specified in the prompt.
+DeThink - Chainlink Functions Empowering Automated In-Game Asset Generation.
 
 ## Demo information:
 
