@@ -233,7 +233,7 @@ export default function Home() {
             <Card title="Generated item">
 
               {
-                image ? <Image src={`/public/${image}`} /> : <></>
+                image ? <Image src={`${image}`} /> : <></>
               }
               <Divider />
               <Table
