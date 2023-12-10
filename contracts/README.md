@@ -14,7 +14,7 @@
 
 |      | GenerateAttributesFunctionsConsumer | GenrateImagesFunctionConsumer |
 | ----------- | ----------- | ----------- |
-| Fuji | [0xDaBdC71D929005dA6B341f17432C157fe4623E8d]() | [0x0e8ffa7ee53de25c3dbd36a644d3f5ddBB006031]() |  () |
+| Fuji | [0xe058c5108ad84075cbc53313ad98d015c73ba9bb]() | [0xAe9617BBEF878C0B77D1E8B1f2AA166aE309C2f4]() |  () |
 
 ## How to deploy contracts from scratch
 
