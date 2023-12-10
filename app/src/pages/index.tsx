@@ -1,23 +1,16 @@
-import { AttributesForm } from '@/components/AttributesForm';
-import { Card, Form, Input, Row, Col, Button, Divider, Image, Select, Space, Table, Layout, Typography, Alert } from 'antd';
-import { useState, useEffect, useCallback } from 'react'
-import generateAttributesABI from "@/abis/attributesFunctionsConsumer.json";
-import generateImagesABI from "@/abis/imagesFunctionsConsumer.json";
+import { attributeContract, getGenerateAttConfig, getGenerateImageConfig, imagesContract } from '@/core/call-contract';
+import { getPromptElement } from '@/core/generate-item-attributes';
+import { ConnectWalletStyle } from '@/styles/wallet';
+import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { prepareWriteContract, waitForTransaction, writeContract } from '@wagmi/core';
+import { Alert, Button, Card, Col, Divider, Form, Image, Input, Layout, Row, Select, Space, Table, Typography } from 'antd';
+import { useCallback, useEffect, useState } from 'react';
+import { fromHex } from 'viem';
 import {
   useAccount,
   useConnect,
-  useContractEvent,
-  useDisconnect,
-  useEnsAvatar,
-  useEnsName,
-  useNetwork,
-} from 'wagmi'
-import { watchContractEvent, prepareWriteContract, writeContract, waitForTransaction } from '@wagmi/core'
-import { fromHex } from 'viem';
-import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
-import { getPromptElement } from '@/core/generate-item-attributes';
-import { attributeContract, getGenerateAttConfig, getGenerateImageConfig, imagesContract } from '@/core/call-contract';
-import { ConnectWalletStyle } from '@/styles/wallet';
+  useNetwork
+} from 'wagmi';
 const { Option } = Select;
 const { Header, Content } = Layout;
 const attContractAddress = process.env.NEXT_PUBLIC_ATTRIBUTES_CONTRACT;
