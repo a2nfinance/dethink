@@ -1,5 +1,5 @@
 ## Overview
-DeThink - Chainlink Functions Empowering Automated In-Game Asset Generation.
+DeThink - Revolutionizing Automated In-Game Asset Generation with Chainlink Functions.
 
 ## Demo information:
 
