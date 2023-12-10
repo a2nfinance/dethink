@@ -15,6 +15,7 @@ export default async function handler(
             // need to validate
             if (req.body) {
                 const data = JSON.parse(req.body);
+                console.log("BODY", data);
                 const response = await openai.images.generate({
                     "model": "dall-e-3",
                     "prompt": data.prompt,

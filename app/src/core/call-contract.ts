@@ -16,6 +16,7 @@ export const getGenerateAttConfig = (prompt: string, chainId: number) => {
         address: attContractAddress,
         abi: generateAttributesABI,
         functionName: 'getAttribute',
+        chainId: chainId,
         args: [
            prompt
         ]
@@ -28,6 +29,7 @@ export const getGenerateImageConfig = (prompt: string, size: string, chainId: nu
         address: imageContractAddress,
         abi: generateImagesABI,
         functionName: 'getAttribute',
+        chainId: chainId,
         args: [
            prompt,
            size

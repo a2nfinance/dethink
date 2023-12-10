@@ -16,7 +16,7 @@ import { watchContractEvent, prepareWriteContract, writeContract, waitForTransac
 import { fromHex } from 'viem';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { getPromptElement } from '@/core/generate-item-attributes';
-import { attributeContract, getGenerateAttConfig } from '@/core/call-contract';
+import { attributeContract, getGenerateAttConfig, getGenerateImageConfig, imagesContract } from '@/core/call-contract';
 const { Option } = Select;
 
 const attContractAddress = process.env.NEXT_PUBLIC_ATTRIBUTES_CONTRACT;
@@ -34,7 +34,7 @@ export default function Home() {
   const [responseAtt, setResponseAtt] = useState([]);
   const [isGeneratingImage, setIsGenratingImage] = useState(false);
   const [isGeneratingAttribute, setIsGenratingAttribute] = useState(false);
-
+  const [image, setImage] = useState("");
   // Get images from API using the POST method
   async function getImage(prompt: string, size: string) {
     try {
@@ -58,11 +58,22 @@ export default function Home() {
 
   }
 
-  const onFinishImage = (values: any) => {
-    // const { prompt, size } = values;
-    // getImage(prompt, size);
+  const onFinishImage = useCallback(async (values: any) => {
+    const { prompt, size } = values;
+    try {
+      setIsGenratingImage(true);
 
-  }
+      const config = getGenerateImageConfig(prompt, size, chain?.id);
+      const { request } = await prepareWriteContract(config)
+      const { hash } = await writeContract(request)
+
+      await waitForTransaction({
+        hash: hash,
+      })
+    } catch (e) {
+      console.log(e)
+    }
+  }, [])
 
   const onFinishAttributeForm = useCallback(async (values: any) => {
     try {
@@ -98,6 +109,13 @@ export default function Home() {
       setResponseAtt(convertedArr);
       setIsGenratingAttribute(false);
     })
+
+    imagesContract.on("Images", async (requestId, latestResponse, latestError) => {
+      const responseJson = JSON.parse(fromHex(latestResponse, "string"));
+      const response = responseJson.response;
+      setImage(response);
+      setIsGenratingImage(false);
+    })
   }, [chain?.id])
 
   if (isConnected && client) {
@@ -106,7 +124,7 @@ export default function Home() {
         <Row gutter={8}>
           <Col span={14}>
             <Card title={"Image settings"}>
-              <Form onFinish={onFinishImage} layout='vertical'>
+              <Form onFinish={(values) => onFinishImage(values)} layout='vertical'>
                 <Row gutter={12}>
                   <Col span={12}>
                     <Form.Item name={"prompt"} label="Prompt" rules={[{ required: true, message: 'Missing first input' }]}>
@@ -118,8 +136,7 @@ export default function Home() {
                   </Col>
                   <Col span={12}>
                     <Form.Item name={"size"} label="Resolution" >
-                      <Select size='large'
-                      >
+                      <Select size='large'>
                         <Option size="1024x1024">1024x1024</Option>
                         <Option size="1792x1024">1792x1024</Option>
                         <Option size="1024x1792">1024x1792</Option>
@@ -133,7 +150,7 @@ export default function Home() {
                   size='large'
                   type='primary'
                   htmlType='submit'
-                >Send Prompt</Button>
+                >Submit</Button>
               </Form>
             </Card>
             <Divider />
@@ -210,7 +227,7 @@ export default function Home() {
             <Card title="Generated item">
 
               {
-                response.map(r => <Image src={r} />)
+                image ? <Image src={image} /> : <></>
               }
               <Divider />
               <Table
