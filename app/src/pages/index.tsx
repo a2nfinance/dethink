@@ -1,7 +1,6 @@
 import { AttributesForm } from '@/components/AttributesForm';
-import { Card, Form, Input, Row, Col, Button, Divider, Image, Select } from 'antd';
-import { useState, useEffect } from 'react'
-import React from 'react';
+import { Card, Form, Input, Row, Col, Button, Divider, Image, Select, Space, Table } from 'antd';
+import { useState, useEffect, useCallback } from 'react'
 import generateAttributesABI from "@/abis/attributesFunctionsConsumer.json";
 import generateImagesABI from "@/abis/imagesFunctionsConsumer.json";
 import {
@@ -11,37 +10,30 @@ import {
   useDisconnect,
   useEnsAvatar,
   useEnsName,
+  useNetwork,
 } from 'wagmi'
-
+import { watchContractEvent, prepareWriteContract, writeContract, waitForTransaction } from '@wagmi/core'
+import { fromHex } from 'viem';
+import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { getPromptElement } from '@/core/generate-item-attributes';
+import { attributeContract, getGenerateAttConfig } from '@/core/call-contract';
 const { Option } = Select;
 
+const attContractAddress = process.env.NEXT_PUBLIC_ATTRIBUTES_CONTRACT;
+const imageContractAddress = process.env.NEXT_PUBLIC_IMAGE_CONTRACT;
 
 export default function Home() {
+
   const [client, setClient] = useState(false);
+  const { chain } = useNetwork();
   const { address, connector, isConnected } = useAccount();
 
   const { connect, connectors, error, isLoading, pendingConnector } = useConnect()
 
   const [response, setResponse] = useState([]);
-  // const [responseAtt, setResponseAtt] = useState([]);
+  const [responseAtt, setResponseAtt] = useState([]);
   const [isGeneratingImage, setIsGenratingImage] = useState(false);
-  // const [isGeneratingAttribute, setIsGenratingAttribute] = useState(false);
-
-
-  useContractEvent({
-    //@ts-ignore
-    address: process.env.NEXT_PUBLIC_ATTRIBUTES_CONTRACT,
-    abi: generateAttributesABI,
-    eventName: 'Attributes',
-    listener(log) {
-      console.log(log);
-      // @ts-ignore
-      //console.log(log[0].args.response);
-       // @ts-ignore
-      //const response = String.fromCharCode(log[0].args.response);
-      //console.log("STRING RESPONSE:", response);
-    },
-  })
+  const [isGeneratingAttribute, setIsGenratingAttribute] = useState(false);
 
   // Get images from API using the POST method
   async function getImage(prompt: string, size: string) {
@@ -66,44 +58,47 @@ export default function Home() {
 
   }
 
-  /*
-  async function getAttribute(message: String) {
-    try {
-      setIsGenratingAttribute(true);
-      let getReq = await fetch("/api/get-attributes", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          message: message,
-        })
-      })
-      let res = await getReq.json();
-      setResponseAtt(res.data);
-      setIsGenratingAttribute(false);
-    } catch (e) {
-      console.log("Error occured:", e);
-    }
+  const onFinishImage = (values: any) => {
+    // const { prompt, size } = values;
+    // getImage(prompt, size);
 
   }
-  */
-  const onFinishImage = (values: any) => {
-    const { prompt, size } = values;
-    getImage(prompt, size);
-  }
-  /*
-  const onFinishAttribute = (values: any) => {
-    const { message } = values;
-    getAttribute(message);
-  }
-  */
-  useEffect(() => {
-    setClient(true);
-    console.log("First Load")
+
+  const onFinishAttributeForm = useCallback(async (values: any) => {
+    try {
+      var message = `Let's create an output of JSON (no any explanations) that name-value pairs as follows: \n`;
+      values.attributes.forEach(element => message = message.concat(getPromptElement({ element }.element.attribute_type, { element }.element.name, { element }.element.minValue, { element }.element.maxValue)));
+
+      console.log(message);
+      setIsGenratingAttribute(true);
+
+      const config = getGenerateAttConfig(message, chain?.id);
+      const { request } = await prepareWriteContract(config)
+      const { hash } = await writeContract(request)
+
+      await waitForTransaction({
+        hash: hash,
+      })
+    } catch (e) {
+      console.log(e)
+    }
   }, [])
 
-
+  useEffect(() => {
+    setClient(true);
+    attributeContract.on("Attributes", async (requestId, latestResponse, latestError) => {
+      const responseJson = JSON.parse(fromHex(latestResponse, "string"));
+      const response = JSON.parse(responseJson.response);
+      const convertedArr = Object.keys(response).map(k => (
+        {
+          title: k,
+          value: response[k]
+        }
+      ))
+      setResponseAtt(convertedArr);
+      setIsGenratingAttribute(false);
+    })
+  }, [chain?.id])
 
   if (isConnected && client) {
     return (
@@ -140,52 +135,74 @@ export default function Home() {
                   htmlType='submit'
                 >Send Prompt</Button>
               </Form>
-              <br />
-              {/* <Form onFinish={onFinishAttribute} layout='vertical'>
-              <Row gutter={12}>
-                <Col span={12}>
-                  <Form.Item name={"dps"} label="Attribute 1" rules={[{ required: true, message: 'Missing first input' }]}>
-                    <Input size='large'
-                      type='text'
-                    />
-                  </Form.Item>
-
-                </Col>
-                <Col span={12}>
-                  <Form.Item name={"dph"} label="Attribute 2" rules={[{ required: true, message: 'Missing first input' }]}>
-                    <Input size='large' type='text'
-                    />
-                  </Form.Item>
-                </Col>
-
-                <Col span={12}>
-                  <Form.Item name={"aps"} label="Attribute 3" rules={[{ required: true, message: 'Missing first input' }]}>
-                    <Input size='large' type='text'
-                    />
-                  </Form.Item>
-                </Col>
-
-                <Col span={12}>
-                  <Form.Item name={"dhe"} label="Attribute 4" rules={[{ required: true, message: 'Missing first input' }]}>
-                    <Input size='large' type='text'
-                    />
-                  </Form.Item>
-                </Col>
-
-              </Row>
-              <Button
-                loading={isGeneratingAttribute}
-                size='large'
-                type='primary'
-                htmlType='submit'
-              >Generate Attributes</Button>
-            </Form> */}
-
-
             </Card>
             <Divider />
             <Card title={"Attribute settings"}>
-              <AttributesForm />
+              <Form
+                name="dynamic_form_nest_item"
+                onFinish={(values) => onFinishAttributeForm(values)}
+                style={{ maxWidth: 600 }}
+                autoComplete="off"
+              >
+                <Form.List name="attributes">
+                  {(fields, { add, remove }) => (
+                    <>
+                      {fields.map(({ key, name, ...restField }) => (
+                        <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'name']}
+                            rules={[{ required: true, message: 'Missing first name' }]}
+                          >
+                            <Input placeholder="Name" />
+                          </Form.Item>
+                          <Form.Item
+                            {...restField}
+                            initialValue={"integer"}
+                            name={[name, 'attribute_type']}
+                            rules={[{ required: true, message: 'Missing attribute type' }]}
+                          >
+                            <Select options={[
+                              { label: "Range", value: "range" },
+                              { label: "Integer", value: "integer" },
+                              { label: "Decimal", value: "float" },
+                              { label: "Percent", value: "percent" }
+                            ]} />
+                          </Form.Item>
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'minValue']}
+                            rules={[{ required: true, message: 'Missing last name' }]}
+                          >
+                            <Input placeholder="Min" />
+                          </Form.Item>
+
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'maxValue']}
+                            rules={[{ required: true, message: 'Missing last name' }]}
+                          >
+                            <Input placeholder="Max" />
+                          </Form.Item>
+
+                          <MinusCircleOutlined onClick={() => remove(name)} />
+                        </Space>
+                      ))}
+                      <Form.Item>
+                        <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                          Add attribute
+                        </Button>
+                      </Form.Item>
+                    </>
+                  )}
+                </Form.List>
+                <Form.Item>
+                  <Button loading={isGeneratingAttribute} type="primary" htmlType="submit">
+                    Submit
+                  </Button>
+                </Form.Item>
+
+              </Form>
             </Card>
           </Col>
 
@@ -196,9 +213,20 @@ export default function Home() {
                 response.map(r => <Image src={r} />)
               }
               <Divider />
-              {
-                // responseAtt.map(i => (<p>{i}</p>))
-              }
+              <Table
+                pagination={false}
+                dataSource={responseAtt} columns={[
+                  {
+                    title: "Name",
+                    key: "title",
+                    dataIndex: "title",
+                  },
+                  {
+                    title: "Value",
+                    key: "value",
+                    dataIndex: "value",
+                  }
+                ]} />
 
               <Row gutter={8}>
                 <Col span={8}>
@@ -214,9 +242,6 @@ export default function Home() {
             </Card>
           </Col>
         </Row>
-
-
-        <div>{address}</div>
       </div>
     )
   }

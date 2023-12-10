@@ -1,9 +1,9 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-import { generateImages } from '@/core/generate-image';
 import type { NextApiRequest, NextApiResponse } from 'next'
+import OpenAI from 'openai';
+const openai = new OpenAI({ apiKey: process.env.OPENAI_KEY, dangerouslyAllowBrowser: true });
 type Data = {
-    success: boolean,
-    data?: string[] // '?' : Optional attribute
+    response: string
 }
 
 export default async function handler(
@@ -14,18 +14,23 @@ export default async function handler(
         if (req.method === 'POST') {
             // need to validate
             if (req.body) {
-                console.log("Results:", req.body);
-                const results = JSON.parse(req.body); // Parse data when receiving request from CL functions.
-                // Call a core function to generate images from the request prompt.
-                const imageURLs = await generateImages(req.body.prompt);
-                res.status(200).send({ success: true, data: imageURLs });
+                const data = JSON.parse(req.body);
+                const response = await openai.images.generate({
+                    "model": "dall-e-3",
+                    "prompt": data.prompt,
+                    "n": 1,
+                    "size": data.size,
+                });
+                console.log(response.data[0].url);
+                res.status(200).send({ response: response.data[0].url });
             } else {
-                res.status(422).send({ success: false });
+                res.status(422).send({ response: "" });
             }
         } else {
-            res.status(422).send({ success: false });
+            res.status(422).send({ response: "" });
         }
     } catch (e) {
-        res.status(500).send({success: false});
+        console.log(e);
+        res.status(500).send({ response: "" });
     }
 }

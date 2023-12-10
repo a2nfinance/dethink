@@ -1,33 +1,27 @@
 const prompt = args[0]
 const size = args[1]
 
-if (
-    !secrets.openaiKey
-) {
-    throw Error(
-        "Need to set OPENAI_KEY environment variable"
-    )
-};
-
-const dalleRequest = Functions.makeHttpRequest({
-    url: "https://api.openai.com/v1/images/generations",
+const url = "https://dethink.a2n.finance/api/get-image";
+const req = Functions.makeHttpRequest({
+    url: url,
     method: "POST",
     headers: {
-        'Authorization': `Bearer ${secrets.openaiKey}`,
+        "Content-Type": "application/json",
     },
-    data: { "model": "dall-e-3", 
-            "prompt": prompt,
-            "n": 1,
-            "size": size,
-            },
+    data: JSON.stringify({ prompt: prompt, size: size })
 });
 
-const [dalleResponse] = await Promise.all([
-    dalleRequest
-]);
-console.log("raw response", dalleResponse);
+const res = await req;
 
-const result = dalleResponse.data[0].url;
-return Functions.encodeString(result);
+if (res.error) {
+    console.error(
+        res.response
+            ? `${res.response.status},${res.response.statusText}`
+            : ""
+    );
+    throw Error("Request failed");
+}
+
+return Functions.encodeString(JSON.stringify(res["data"]));
 
 
