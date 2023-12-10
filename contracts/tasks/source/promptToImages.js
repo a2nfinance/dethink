@@ -1,6 +1,5 @@
 const prompt = args[0]
 const size = args[1]
-
 const url = "https://dethink.a2n.finance/api/get-image";
 const req = Functions.makeHttpRequest({
     url: url,
@@ -8,7 +7,8 @@ const req = Functions.makeHttpRequest({
     headers: {
         "Content-Type": "application/json",
     },
-    data: JSON.stringify({ prompt: prompt, size: size })
+    data: JSON.stringify({ prompt: prompt, size: size }),
+    timeout: 9000
 });
 
 const res = await req;

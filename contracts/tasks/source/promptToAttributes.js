@@ -6,8 +6,10 @@ const req = Functions.makeHttpRequest({
   headers: {
     "Content-Type": "application/json",
   },
-  data: JSON.stringify({prompt: prompt})
+  data: JSON.stringify({prompt: prompt}),
+  timeout: 9000
 });
+
 
 const res = await req;
 
