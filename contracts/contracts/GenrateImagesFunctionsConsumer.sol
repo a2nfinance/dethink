@@ -39,7 +39,7 @@ contract GenerateImagesFunctionsConsumer is FunctionsClient, ConfirmedOwner {
     donId = _donId;
   }
 
-  function _sendRequestWithoutCBOR(string memory _prompt, string memory _size) internal onlyOwner returns (bytes32) {
+  function _sendRequestWithoutCBOR(string memory _prompt, string memory _size) internal returns (bytes32) {
     FunctionsRequest.Request memory req;
     req.initializeRequest(FunctionsRequest.Location.Inline, FunctionsRequest.CodeLanguage.JavaScript, source);
     string[] memory args = new string[](2);

@@ -1,48 +1,34 @@
-import { AttributesForm } from '@/components/AttributesForm';
-import { Card, Form, Input, Row, Col, Button, Divider, Image, Select } from 'antd';
-import { useState, useEffect } from 'react'
-import React from 'react';
-import generateAttributesABI from "@/abis/attributesFunctionsConsumer.json";
-import generateImagesABI from "@/abis/imagesFunctionsConsumer.json";
+import { attributeContract, getGenerateAttConfig, getGenerateImageConfig, imagesContract } from '@/core/call-contract';
+import { getPromptElement } from '@/core/generate-item-attributes';
+import { ConnectWalletStyle } from '@/styles/wallet';
+import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import { prepareWriteContract, waitForTransaction, writeContract } from '@wagmi/core';
+import { Alert, Button, Card, Col, Divider, Form, Image, Input, Layout, Row, Select, Space, Table, Typography } from 'antd';
+import { useCallback, useEffect, useState } from 'react';
+import { fromHex } from 'viem';
 import {
   useAccount,
   useConnect,
-  useContractEvent,
-  useDisconnect,
-  useEnsAvatar,
-  useEnsName,
-} from 'wagmi'
-
+  useNetwork
+} from 'wagmi';
 const { Option } = Select;
-
-
+const { Header, Content } = Layout;
+const attContractAddress = process.env.NEXT_PUBLIC_ATTRIBUTES_CONTRACT;
+const imageContractAddress = process.env.NEXT_PUBLIC_IMAGE_CONTRACT;
+const { Title, Text } = Typography;
 export default function Home() {
+
   const [client, setClient] = useState(false);
+  const { chain } = useNetwork();
   const { address, connector, isConnected } = useAccount();
 
   const { connect, connectors, error, isLoading, pendingConnector } = useConnect()
 
   const [response, setResponse] = useState([]);
-  // const [responseAtt, setResponseAtt] = useState([]);
+  const [responseAtt, setResponseAtt] = useState([]);
   const [isGeneratingImage, setIsGenratingImage] = useState(false);
-  // const [isGeneratingAttribute, setIsGenratingAttribute] = useState(false);
-
-
-  useContractEvent({
-    //@ts-ignore
-    address: process.env.NEXT_PUBLIC_ATTRIBUTES_CONTRACT,
-    abi: generateAttributesABI,
-    eventName: 'Attributes',
-    listener(log) {
-      console.log(log);
-      // @ts-ignore
-      //console.log(log[0].args.response);
-       // @ts-ignore
-      //const response = String.fromCharCode(log[0].args.response);
-      //console.log("STRING RESPONSE:", response);
-    },
-  })
-
+  const [isGeneratingAttribute, setIsGenratingAttribute] = useState(false);
+  const [image, setImage] = useState("");
   // Get images from API using the POST method
   async function getImage(prompt: string, size: string) {
     try {
@@ -66,52 +52,81 @@ export default function Home() {
 
   }
 
-  /*
-  async function getAttribute(message: String) {
-    try {
-      setIsGenratingAttribute(true);
-      let getReq = await fetch("/api/get-attributes", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          message: message,
-        })
-      })
-      let res = await getReq.json();
-      setResponseAtt(res.data);
-      setIsGenratingAttribute(false);
-    } catch (e) {
-      console.log("Error occured:", e);
-    }
-
-  }
-  */
-  const onFinishImage = (values: any) => {
+  const onFinishImage = useCallback(async (values: any) => {
     const { prompt, size } = values;
-    getImage(prompt, size);
-  }
-  /*
-  const onFinishAttribute = (values: any) => {
-    const { message } = values;
-    getAttribute(message);
-  }
-  */
-  useEffect(() => {
-    setClient(true);
-    console.log("First Load")
+    try {
+      setIsGenratingImage(true);
+
+      const config = getGenerateImageConfig(prompt, size, chain?.id);
+      const { request } = await prepareWriteContract(config)
+      const { hash } = await writeContract(request)
+
+      await waitForTransaction({
+        hash: hash,
+      })
+    } catch (e) {
+      console.log(e)
+    }
   }, [])
 
+  const onFinishAttributeForm = useCallback(async (values: any) => {
+    try {
+      var message = `Let's create an output of JSON (no any explanations) that name-value pairs as follows: \n`;
+      values.attributes.forEach(element => message = message.concat(getPromptElement({ element }.element.attribute_type, { element }.element.name, { element }.element.minValue, { element }.element.maxValue)));
 
+      console.log(message);
+      setIsGenratingAttribute(true);
+
+      const config = getGenerateAttConfig(message, chain?.id);
+      const { request } = await prepareWriteContract(config)
+      const { hash } = await writeContract(request)
+
+      await waitForTransaction({
+        hash: hash,
+      })
+    } catch (e) {
+      console.log(e)
+    }
+  }, [])
+
+  useEffect(() => {
+    setClient(true);
+    attributeContract.on("Attributes", async (requestId, latestResponse, latestError) => {
+      const responseJson = JSON.parse(fromHex(latestResponse, "string"));
+      const response = JSON.parse(responseJson.response);
+      const convertedArr = Object.keys(response).map(k => (
+        {
+          title: k,
+          value: response[k]
+        }
+      ))
+      setResponseAtt(convertedArr);
+      setIsGenratingAttribute(false);
+    })
+
+    imagesContract.on("Images", async (requestId, latestResponse, latestError) => {
+      try {
+        console.log(latestResponse);
+        const responseJson = JSON.parse(fromHex(latestResponse, "string"));
+        console.log(responseJson);
+        const response = responseJson.response;
+        setImage(response);
+      } catch (e) {
+        console.log(e);
+      }
+
+      setIsGenratingImage(false);
+    })
+  }, [chain?.id])
 
   if (isConnected && client) {
     return (
       <div style={{ width: 1024, marginLeft: "auto", marginRight: "auto" }}>
+
         <Row gutter={8}>
           <Col span={14}>
-            <Card title={"Image settings"}>
-              <Form onFinish={onFinishImage} layout='vertical'>
+            <Card title={"Image settings"} headStyle={{ backgroundColor: "#1677ff", color: "whitesmoke" }}>
+              <Form onFinish={(values) => onFinishImage(values)} layout='vertical'>
                 <Row gutter={12}>
                   <Col span={12}>
                     <Form.Item name={"prompt"} label="Prompt" rules={[{ required: true, message: 'Missing first input' }]}>
@@ -123,12 +138,10 @@ export default function Home() {
                   </Col>
                   <Col span={12}>
                     <Form.Item name={"size"} label="Resolution" >
-                      <Select size='large'
-                      >
-                        <Option size="1024x1024">1024x1024</Option>
-                        <Option size="1792x1024">1792x1024</Option>
-                        <Option size="1024x1792">1024x1792</Option>
-                      </Select>
+                      <Select size='large' options={[
+                        { label: "256x256", value: "256x256" },
+                        { label: "512x512", value: "512x512" },
+                      ]} />
                     </Form.Item>
                   </Col>
 
@@ -138,67 +151,100 @@ export default function Home() {
                   size='large'
                   type='primary'
                   htmlType='submit'
-                >Send Prompt</Button>
+                >Submit</Button>
               </Form>
-              <br />
-              {/* <Form onFinish={onFinishAttribute} layout='vertical'>
-              <Row gutter={12}>
-                <Col span={12}>
-                  <Form.Item name={"dps"} label="Attribute 1" rules={[{ required: true, message: 'Missing first input' }]}>
-                    <Input size='large'
-                      type='text'
-                    />
-                  </Form.Item>
-
-                </Col>
-                <Col span={12}>
-                  <Form.Item name={"dph"} label="Attribute 2" rules={[{ required: true, message: 'Missing first input' }]}>
-                    <Input size='large' type='text'
-                    />
-                  </Form.Item>
-                </Col>
-
-                <Col span={12}>
-                  <Form.Item name={"aps"} label="Attribute 3" rules={[{ required: true, message: 'Missing first input' }]}>
-                    <Input size='large' type='text'
-                    />
-                  </Form.Item>
-                </Col>
-
-                <Col span={12}>
-                  <Form.Item name={"dhe"} label="Attribute 4" rules={[{ required: true, message: 'Missing first input' }]}>
-                    <Input size='large' type='text'
-                    />
-                  </Form.Item>
-                </Col>
-
-              </Row>
-              <Button
-                loading={isGeneratingAttribute}
-                size='large'
-                type='primary'
-                htmlType='submit'
-              >Generate Attributes</Button>
-            </Form> */}
-
-
             </Card>
             <Divider />
-            <Card title={"Attribute settings"}>
-              <AttributesForm />
+            <Card title={"Attribute settings"} headStyle={{ backgroundColor: "#1677ff", color: "whitesmoke" }}>
+              <Form
+                name="dynamic_form_nest_item"
+                onFinish={(values) => onFinishAttributeForm(values)}
+                style={{ maxWidth: 600 }}
+                autoComplete="off"
+              >
+                <Form.List name="attributes">
+                  {(fields, { add, remove }) => (
+                    <>
+                      {fields.map(({ key, name, ...restField }) => (
+                        <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'name']}
+                            rules={[{ required: true, message: 'Missing first name' }]}
+                          >
+                            <Input placeholder="Name" />
+                          </Form.Item>
+                          <Form.Item
+                            {...restField}
+                            initialValue={"integer"}
+                            name={[name, 'attribute_type']}
+                            rules={[{ required: true, message: 'Missing attribute type' }]}
+                          >
+                            <Select options={[
+                              { label: "Range", value: "range" },
+                              { label: "Integer", value: "integer" },
+                              { label: "Decimal", value: "float" },
+                              { label: "Percent", value: "percent" }
+                            ]} />
+                          </Form.Item>
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'minValue']}
+                            rules={[{ required: true, message: 'Missing last name' }]}
+                          >
+                            <Input placeholder="Min" />
+                          </Form.Item>
+
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'maxValue']}
+                            rules={[{ required: true, message: 'Missing last name' }]}
+                          >
+                            <Input placeholder="Max" />
+                          </Form.Item>
+
+                          <MinusCircleOutlined onClick={() => remove(name)} />
+                        </Space>
+                      ))}
+                      <Form.Item>
+                        <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                          Add attribute
+                        </Button>
+                      </Form.Item>
+                    </>
+                  )}
+                </Form.List>
+                <Form.Item>
+                  <Button size='large' loading={isGeneratingAttribute} type="primary" htmlType="submit">
+                    Submit
+                  </Button>
+                </Form.Item>
+
+              </Form>
             </Card>
           </Col>
 
           <Col span={10}>
-            <Card title="Generated item">
+            <Card title="Generated item" headStyle={{ backgroundColor: "#1677ff", color: "whitesmoke" }}>
 
               {
-                response.map(r => <Image src={r} />)
+                image ? <Image src={`${image}`} /> : <></>
               }
               <Divider />
-              {
-                // responseAtt.map(i => (<p>{i}</p>))
-              }
+              <Table
+                pagination={false}
+                dataSource={responseAtt} columns={[
+                  {
+                    title: "Name",
+                    key: "title",
+                    dataIndex: "title",
+                  },
+                  {
+                    title: "Value",
+                    key: "value",
+                    dataIndex: "value",
+                  }
+                ]} />
 
               <Row gutter={8}>
                 <Col span={8}>
@@ -214,30 +260,34 @@ export default function Home() {
             </Card>
           </Col>
         </Row>
-
-
-        <div>{address}</div>
       </div>
     )
   }
 
   return (
-    client && <div>
-      {connectors.map((connector) => (
-        <Button
-          size="large"
-          type="primary"
-          disabled={!connector.ready}
-          key={connector.id}
-          loading={isLoading &&
-            connector.id === pendingConnector?.id}
-          onClick={() => connect({ connector })}
-        >
-          {!connector?.ready ? `${connector?.name} (unsupported)` : connector?.name}
-        </Button>
-      ))}
+    client && <Card
+      //@ts-ignore
+      style={ConnectWalletStyle}>
+      <Space direction="vertical" style={{ width: "100%", textAlign: "center" }}>
+        <Title level={3}>DETHINK</Title>
+        <Text>Revolutionizing Automated In-Game Asset Generation with Chainlink Functions!</Text>
+        {connectors.map((connector) => (
+          <Button
+            style={{ width: "100%" }}
+            size="large"
+            type="primary"
+            disabled={!connector.ready}
+            key={connector.id}
+            loading={isLoading &&
+              connector.id === pendingConnector?.id}
+            onClick={() => connect({ connector })}
+          >
+            {!connector?.ready ? `${connector?.name} (unsupported)` : connector?.name}
+          </Button>
+        ))}
 
-      {error && <div>{error.message}</div>}
-    </div>
+        {error && <Alert type="error" message={error.message} showIcon />}
+      </Space>
+    </Card>
   )
 }
