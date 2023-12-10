@@ -144,9 +144,8 @@ export default function Home() {
                   <Col span={12}>
                     <Form.Item name={"size"} label="Resolution" >
                       <Select size='large' options={[
-                        { label: "1024x1024", value: "1024x1024" },
-                        { label: "1792x1024", value: "1792x1024" },
-                        { label: "1024x1792", value: "1024x1792" }
+                        { label: "256x256", value: "256x256" },
+                        { label: "512x512", value: "512x512" },
                       ]} />
                     </Form.Item>
                   </Col>
@@ -234,7 +233,7 @@ export default function Home() {
             <Card title="Generated item">
 
               {
-                image ? <Image src={image} /> : <></>
+                image ? <Image src={`/public/${image}`} /> : <></>
               }
               <Divider />
               <Table
