@@ -32,4 +32,4 @@
 ### Integrate with Chainlink
 - Create a Chainlink subscription ID and add consumer.
 
-Do that on the chain: Fuji.
+Do that on the chain Fuji.
