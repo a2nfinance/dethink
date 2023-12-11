@@ -11,7 +11,7 @@ DeThink has utilized Chainlink Technologies as core components, [more details ca
 ## OpenAI platform
 DeThink has utilized the OpenAI platform with the following models:
 - gpt-3.5-turbo: to generate prompts to attributes.
-- dall-e-3: to generate prompts to images.
+- dall-e-2: to generate prompts to images.
 
 ## System architecture
 ![](./)
