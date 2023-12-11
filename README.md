@@ -3,7 +3,7 @@ DeThink - Automated In-Game Asset Generation with Chainlink Functions and OpenAI
 
 ## Demo information:
 
-- DeThink: [app.dethink.a2n.finance](https://app.dethink.a2n.finance)
+- DeThink: [dethink.a2n.finance](https://dethink.a2n.finance/)
 
 ## Chainlink technology
 DeThink has utilized Chainlink Technologies as core components, [more details can be found here](./contracts/README.md).
@@ -16,7 +16,7 @@ DeThink has utilized the OpenAI platform with the following models:
 ## System architecture
 ![](./)
 
-We have an explain of this architecture, please see our [introduction video]().
+We have an explain of this architecture, please see our [introduction video](https://www.youtube.com/watch?v=cghvzXYTDqs).
 
 ## Prerequisites
 
