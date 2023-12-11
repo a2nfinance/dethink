@@ -2,7 +2,7 @@
 ## Utilizing Chainlink technologies
 - The smart contract utilizes Chainlink Functions: 
 [GenerateAttributesFunctionsConsumer](./contracts/GenerateAttributesFunctionsConsumer.sol)
-[GenrateImagesFunctionConsumer](./contracts/GenrateImagesFunctionConsumer.sol)
+[GenrateImagesFunctionConsumer](./contracts/GenrateImagesFunctionsConsumer.sol)
 
 ## Chainlink Subscriptions
 
